@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="theme-color" content="#0B1D35"/>
+<title>Fuel Maroc ⛽</title>
+<style>
+/* ══════════════════════════════════════════
+   RESET & VARIABLES
+══════════════════════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --navy:#0B1D35;--navy2:#142B4E;--navy3:#1D3A63;
+  --orange:#F5620F;--orange2:#D94E08;--orange-lt:#FFF0E8;
+  --green:#0ABF7E;--green2:#059669;--green-lt:#E4F9F2;
+  --red:#E5303B;--red-lt:#FEE8E9;
+  --amber:#F09D1A;--amber-lt:#FEF5E0;
+  --blue-lt:#E8EFFE;
+  --white:#fff;--off:#F5F7FB;--off2:#EDF1F7;
+  --text:#0B1D35;--text2:#4A6080;--text3:#9DB0C5;
+  --border:#DDE5EF;--border2:#C8D5E8;
+  --shadow:0 2px 12px rgba(11,29,53,.08);
+  --ff:system-ui,-apple-system,'Segoe UI',sans-serif;
+  --ff-ar:'Noto Sans Arabic',system-ui,sans-serif;
+}
+
+/* RTL support */
+[dir="rtl"]{direction:rtl;text-align:right}
+[dir="rtl"] select.inp{background-position:left 12px center;padding-right:14px;padding-left:36px}
+[dir="rtl"] .sc-price{text-align:left}
+[dir="rtl"] .bnav-txt{font-family:var(--ff-ar)}
+
+html,body{height:100%;overflow:hidden;background:var(--off);font-family:var(--ff);color:var(--text);font-size:15px}
+input,select,button{font-family:inherit;font-size:14px}
+button{cursor:pointer;border:none;background:none}
+input:focus,select:focus{outline:none}
+::-webkit-scrollbar{width:0;height:0}
+
+/* ══════════════════════════════════════════
+   SHELL
+══════════════════════════════════════════ */
+#app{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--off);overflow:hidden}
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;animation:sIn .25s ease both}
+.screen.active{display:flex}
+@keyframes sIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.sb-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* ══════════════════════════════════════════
+   STATUS BAR
+══════════════════════════════════════════ */
+.sbar{background:var(--navy);padding:32px 18px 10px;display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:rgba(255,255,255,.5);flex-shrink:0}
+
+/* ══════════════════════════════════════════
+   BOTTOM NAV
+══════════════════════════════════════════ */
+.bnav{display:flex;background:rgba(255,255,255,.97);border-top:1px solid var(--border);padding:8px 0 16px;flex-shrink:0;box-shadow:0 -4px 20px rgba(11,29,53,.07)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 2px;color:var(--text3);font-size:10px;font-weight:700;border:none;background:none;cursor:pointer;transition:color .15s}
+.nb.on{color:var(--orange)}
+.nb-ic{font-size:20px;line-height:1}
+
+/* ══════════════════════════════════════════
+   HEADERS
+══════════════════════════════════════════ */
+.nhdr{background:linear-gradient(155deg,var(--navy),var(--navy3));padding:14px 16px 18px;flex-shrink:0;position:relative;overflow:hidden}
+.nhdr::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(245,98,15,.2),transparent 70%);pointer-events:none}
+.hrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.htitle{font-size:21px;font-weight:900;color:#fff;letter-spacing:-.5px}
+.hsub{font-size:11px;color:rgba(255,255,255,.45);margin-top:2px}
+.ibbtn{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
+
+/* ══════════════════════════════════════════
+   LANG TOGGLE — top right of header
+══════════════════════════════════════════ */
+.lang-toggle{
+  display:flex;gap:4px;align-items:center;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:24px;
+  padding:4px;
+}
+.lang-btn{
+  padding:5px 12px;border-radius:20px;font-size:11px;font-weight:800;
+  color:rgba(255,255,255,.55);border:none;background:transparent;cursor:pointer;
+  transition:all .18s;white-space:nowrap;
+}
+.lang-btn.on{background:var(--orange);color:#fff;box-shadow:0 2px 8px rgba(245,98,15,.4)}
+
+/* ══════════════════════════════════════════
+   CITY DROPDOWN (styled select)
+══════════════════════════════════════════ */
+.city-select-wrap{position:relative;margin-bottom:12px}
+.city-select-wrap::after{
+  content:'▼';
+  position:absolute;
+  top:50%;transform:translateY(-50%);
+  font-size:10px;color:rgba(255,255,255,.5);
+  pointer-events:none;
+}
+[dir="ltr"] .city-select-wrap::after{right:14px}
+[dir="rtl"] .city-select-wrap::after{left:14px;right:auto}
+.city-sel{
+  width:100%;
+  background:rgba(255,255,255,.12);
+  border:1.5px solid rgba(255,255,255,.2);
+  border-radius:12px;
+  color:#fff;
+  font-size:14px;font-weight:700;
+  padding:11px 38px 11px 14px;
+  appearance:none;-webkit-appearance:none;
+  cursor:pointer;
+  outline:none;
+}
+.city-sel option{background:#1D3A63;color:#fff}
+[dir="rtl"] .city-sel{padding:11px 14px 11px 38px;text-align:right}
+
+/* ══════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════ */
+.btn-or{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff;font-weight:800;border-radius:14px;padding:13px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(245,98,15,.32);width:100%;border:none;cursor:pointer;transition:transform .15s}
+.btn-or:active{transform:scale(.97)}
+.btn-nv{background:var(--navy);color:#fff;font-weight:800;border-radius:14px;padding:12px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:7px;width:100%;border:none;cursor:pointer}
+.btn-gh{background:var(--off2);color:var(--text2);font-weight:700;border-radius:12px;padding:11px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:7px;border:1.5px solid var(--border2);width:100%;cursor:pointer}
+.btn-gr{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;font-weight:800;border-radius:14px;padding:12px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:7px;width:100%;border:none;cursor:pointer}
+
+/* ══════════════════════════════════════════
+   CARDS
+══════════════════════════════════════════ */
+.card{background:var(--white);border-radius:18px;box-shadow:var(--shadow);border:1px solid var(--border);padding:16px}
+.card-sm{background:var(--white);border-radius:14px;box-shadow:var(--shadow);border:1px solid var(--border);padding:12px 14px}
+
+/* ══════════════════════════════════════════
+   INPUTS
+══════════════════════════════════════════ */
+.inp{background:var(--off2);border:1.5px solid var(--border);border-radius:12px;color:var(--text);padding:11px 14px;width:100%;font-weight:600;font-family:inherit;transition:border .2s}
+.inp:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(245,98,15,.1)}
+.inp::placeholder{color:var(--text3);font-weight:400}
+select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%239DB0C5' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+[dir="rtl"] select.inp{background-position:left 12px center;padding-right:14px;padding-left:36px}
+
+/* ══════════════════════════════════════════
+   TAGS & SEG
+══════════════════════════════════════════ */
+.tag{display:inline-flex;align-items:center;border-radius:20px;font-size:10px;font-weight:800;padding:3px 9px;gap:3px}
+.tg{background:var(--green-lt);color:#065f46}
+.tr{background:var(--red-lt);color:#991b1b}
+.ta{background:var(--amber-lt);color:#92400e}
+
+.seg{display:flex;background:rgba(255,255,255,.12);border-radius:12px;padding:3px;gap:2px}
+.sb{flex:1;padding:8px 4px;border-radius:9px;font-size:11px;font-weight:700;color:rgba(255,255,255,.45);text-align:center;border:none;background:transparent;cursor:pointer;transition:all .15s}
+.sb.on{background:#fff;color:var(--navy);box-shadow:0 2px 6px rgba(0,0,0,.12)}
+
+.seg2{display:flex;background:var(--off2);border-radius:12px;padding:3px;gap:2px}
+.sb2{flex:1;padding:9px 4px;border-radius:9px;font-size:12px;font-weight:700;color:var(--text3);text-align:center;border:none;background:transparent;cursor:pointer;transition:all .15s}
+.sb2.on{background:#fff;color:var(--navy);box-shadow:var(--shadow)}
+
+/* ══════════════════════════════════════════
+   CHIPS
+══════════════════════════════════════════ */
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{padding:7px 13px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid var(--border);background:var(--white);color:var(--text2);white-space:nowrap;cursor:pointer;flex-shrink:0;transition:all .15s}
+.chip.on{background:var(--orange-lt);border-color:rgba(245,98,15,.4);color:var(--orange2)}
+.chip.bl.on{background:var(--blue-lt);border-color:#93c5fd;color:#1d4ed8}
+
+/* ══════════════════════════════════════════
+   TOGGLE
+══════════════════════════════════════════ */
+.tog{width:44px;height:24px;border-radius:24px;position:relative;flex-shrink:0;cursor:pointer;transition:background .2s}
+.tog.on{background:var(--orange)}
+.tog.off{background:#dde5ef}
+.tog::after{content:'';position:absolute;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18);transition:left .2s}
+.tog.on::after{left:23px}
+.tog.off::after{left:3px}
+
+/* ══════════════════════════════════════════
+   STATION CARD
+══════════════════════════════════════════ */
+.sc{background:var(--white);border-radius:16px;box-shadow:var(--shadow);border:1.5px solid var(--border);padding:13px;display:flex;gap:11px;align-items:center;cursor:pointer;transition:border-color .15s,transform .1s}
+.sc:active{border-color:var(--orange);transform:scale(.99)}
+.sc.best{border-color:var(--green);box-shadow:0 4px 16px rgba(10,191,126,.12)}
+.sc-logo{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.sc-info{flex:1;min-width:0}
+.sc-name{font-size:14px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:3px}
+.sc-meta{font-size:11px;color:var(--text3);margin-bottom:5px}
+.sc-svc{display:flex;gap:4px}
+.sv{width:20px;height:20px;border-radius:6px;background:var(--off2);display:flex;align-items:center;justify-content:center;font-size:11px}
+.sc-price{text-align:right;flex-shrink:0}
+.sc-p{font-size:21px;font-weight:900;line-height:1;letter-spacing:-.5px}
+.sc-u{font-size:9px;color:var(--text3);margin-top:2px}
+.sc-d{font-size:10px;font-weight:700;margin-top:2px}
+[dir="rtl"] .sc-price{text-align:left}
+
+/* ══════════════════════════════════════════
+   SEARCH BAR
+══════════════════════════════════════════ */
+.srch{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.srch input{background:none;border:none;color:#fff;font-size:13px;flex:1;outline:none;font-family:inherit}
+.srch input::placeholder{color:rgba(255,255,255,.35)}
+
+/* ══════════════════════════════════════════
+   HERO
+══════════════════════════════════════════ */
+.hero{background:linear-gradient(135deg,rgba(245,98,15,.15),rgba(245,98,15,.06));border:1px solid rgba(245,98,15,.3);border-radius:18px;padding:16px;position:relative;overflow:hidden;cursor:pointer}
+.hero::after{content:'⭐';position:absolute;top:-8px;right:-4px;font-size:48px;opacity:.07;pointer-events:none}
+[dir="rtl"] .hero::after{right:auto;left:-4px}
+.hero-p{font-size:42px;font-weight:900;color:#22c55e;line-height:1;letter-spacing:-2px}
+
+/* ══════════════════════════════════════════
+   PRICE CARD
+══════════════════════════════════════════ */
+.pc{background:var(--off2);border-radius:14px;padding:12px;text-align:center;border:1.5px solid var(--border);transition:all .15s}
+.pc.on{background:var(--orange-lt);border-color:rgba(245,98,15,.4)}
+
+/* ══════════════════════════════════════════
+   SERVICE CHIP
+══════════════════════════════════════════ */
+.svc{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid var(--border);background:var(--off2);color:var(--text2)}
+.svc.on{background:var(--green-lt);border-color:#6ee7b7;color:#065f46}
+
+/* ══════════════════════════════════════════
+   MAP
+══════════════════════════════════════════ */
+.map-area{background:linear-gradient(135deg,#d4edda,#c8e6f5,#d4edda);position:relative;overflow:hidden;flex:1;min-height:0}
+.pin{position:absolute;transform:translate(-50%,-100%);cursor:pointer;transition:transform .15s}
+.pin:active{transform:translate(-50%,-110%) scale(1.1)}
+.pin-b{border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2.5px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.22)}
+.pin-b span{transform:rotate(45deg);font-size:9px;font-weight:900;color:#fff;white-space:nowrap}
+.udot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.ui{width:14px;height:14px;border-radius:50%;background:#2563eb;border:2.5px solid #fff;box-shadow:0 0 0 8px rgba(37,99,235,.18)}
+
+/* ══════════════════════════════════════════
+   TRIP
+══════════════════════════════════════════ */
+.trip-res{background:linear-gradient(135deg,var(--navy),var(--navy3));border-radius:20px;padding:20px;text-align:center;box-shadow:0 8px 32px rgba(11,29,53,.25)}
+.trip-cost{font-size:52px;font-weight:900;color:#22c55e;letter-spacing:-2.5px;line-height:1}
+
+/* ══════════════════════════════════════════
+   HIST BARS
+══════════════════════════════════════════ */
+.hbar{flex:1;border-radius:3px 3px 0 0;background:var(--off2)}
+.hbar.hi{background:linear-gradient(to top,var(--orange),#f5a44f)}
+
+/* ══════════════════════════════════════════
+   SECTION LABEL
+══════════════════════════════════════════ */
+.sl{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px}
+
+/* ══════════════════════════════════════════
+   BADGE
+══════════════════════════════════════════ */
+.badge-c{background:var(--white);border-radius:12px;padding:10px 8px;text-align:center;border:1px solid var(--border);box-shadow:var(--shadow)}
+
+/* ══════════════════════════════════════════
+   PROGRESS
+══════════════════════════════════════════ */
+.prog{height:6px;background:var(--off2);border-radius:6px;overflow:hidden}
+.pf{height:100%;border-radius:6px}
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+#toast-c{position:fixed;top:52px;left:50%;transform:translateX(-50%);width:calc(100% - 28px);z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:#fff;border-radius:16px;padding:13px 15px;box-shadow:0 8px 32px rgba(0,0,0,.18);display:flex;gap:11px;align-items:flex-start;pointer-events:all;animation:sIn .35s cubic-bezier(.34,1.3,.64,1) both;border-left:4px solid var(--green)}
+.toast.er{border-left-color:var(--red)}
+.toast.inf{border-left-color:var(--orange)}
+[dir="rtl"] .toast{border-left:none;border-right:4px solid var(--green)}
+[dir="rtl"] .toast.er{border-right-color:var(--red)}
+[dir="rtl"] .toast.inf{border-right-color:var(--orange)}
+.ti{font-size:19px;flex-shrink:0}
+.tb2{flex:1}
+.tt{font-weight:800;font-size:13px;color:var(--text);margin-bottom:2px}
+.tm{font-size:12px;color:var(--text2);line-height:1.5}
+.tc{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer}
+
+/* ══════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════ */
+.mover{position:fixed;inset:0;background:rgba(11,29,53,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;justify-content:center;animation:fi .2s ease both}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.msheet{background:var(--white);border-radius:24px 24px 0 0;width:100%;padding:20px;animation:su .3s cubic-bezier(.34,1.06,.64,1) both;max-height:85vh;overflow-y:auto}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mhandle{width:40px;height:4px;background:var(--border2);border-radius:4px;margin:0 auto 20px}
+
+/* ══════════════════════════════════════════
+   STARS
+══════════════════════════════════════════ */
+.stars{color:#f59e0b;font-size:15px;letter-spacing:1px}
+
+/* ══════════════════════════════════════════
+   AD SLOT
+══════════════════════════════════════════ */
+.ad-slot{background:linear-gradient(135deg,var(--blue-lt),var(--green-lt));border:1.5px dashed #93c5fd;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3);font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<div id="app">
+<div id="toast-c"></div>
+<div id="modal-c"></div>
+
+<!-- ████████████████ SCREEN: HOME ████████████████ -->
+<div class="screen active" id="s-home">
+  <div class="sbar"><span id="clk">9:41</span><span>🔋 87%</span></div>
+  <div class="nhdr">
+    <!-- Top row: greeting + lang toggle -->
+    <div class="hrow">
+      <div>
+        <div id="h-location" style="font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">📍 <span id="h-city-lbl">Casablanca</span> · 🇲🇦</div>
+        <div class="htitle" id="h-greeting">Bonjour 👋</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+        <!-- LANGUAGE TOGGLE -->
+        <div class="lang-toggle">
+          <button class="lang-btn on" id="lb-fr" onclick="setLang('fr')">🇫🇷 FR</button>
+          <button class="lang-btn" id="lb-ar" onclick="setLang('ar')">🇲🇦 ع</button>
+        </div>
+        <button class="ibbtn" onclick="locateMe()" id="locate-btn" style="font-size:16px">📍</button>
+      </div>
+    </div>
+    <!-- Search -->
+    <div class="srch">
+      <span style="font-size:16px;color:rgba(255,255,255,.4)">🔍</span>
+      <input id="srch-inp" placeholder="Station, quartier…" oninput="doSearch(this.value)"/>
+    </div>
+    <!-- CITY DROPDOWN -->
+    <div class="city-select-wrap">
+      <select class="city-sel" id="city-drop" onchange="setCity(this.value)">
+        <option value="Casablanca">📍 Casablanca</option>
+        <option value="Rabat">📍 Rabat</option>
+        <option value="Fès">📍 Fès</option>
+        <option value="Marrakech">📍 Marrakech</option>
+        <option value="Tanger">📍 Tanger</option>
+        <option value="Agadir">📍 Agadir</option>
+        <option value="Meknès">📍 Meknès</option>
+        <option value="Oujda">📍 Oujda</option>
+      </select>
+    </div>
+    <!-- Fuel segmented -->
+    <div class="seg" id="fuel-seg">
+      <button class="sb on" onclick="setFuel('Gasoil',this)" id="fb-g">🔵 <span data-t="gasoil">Gasoil</span></button>
+      <button class="sb" onclick="setFuel('Essence',this)" id="fb-e">🟢 <span data-t="essence">Essence</span></button>
+      <button class="sb" onclick="setFuel('GPL',this)" id="fb-p">🟡 <span data-t="gpl">GPL</span></button>
+    </div>
+  </div>
+
+  <div class="sb-body" style="padding:14px 14px 90px">
+    <!-- Hero best price -->
+    <div class="hero" id="hero-card" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px">
+            <span class="tag tg" id="best-tag">⭐ Meilleur prix</span>
+            <span class="tag tg" id="verif-tag">✓ Vérifié</span>
+          </div>
+          <div id="h-name" style="font-size:18px;font-weight:900;color:var(--text)">🟣 Appolo</div>
+          <div id="h-dist" style="font-size:11px;color:var(--text3);margin-top:4px">📍 0.6km</div>
+        </div>
+        <div style="text-align:right">
+          <div class="hero-p" id="h-price">11.00</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px" id="h-mad-lbl">MAD / L</div>
+          <div id="h-save" style="font-size:10px;color:var(--green2);font-weight:700;background:var(--green-lt);border-radius:6px;padding:2px 7px;margin-top:3px">💰 Éco. 7.20 MAD</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="btn-gr" onclick="doNav(event,'best')" style="padding:11px;font-size:12px" id="go-btn">🗺️ <span data-t="yaller">Y aller</span></button>
+        <button class="btn-gh" onclick="openDetail(0);event.stopPropagation()" style="padding:11px;font-size:12px" id="details-btn">📋 <span data-t="details">Détails</span></button>
+      </div>
+    </div>
+    <!-- Stats row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:14px">
+      <div class="card-sm" style="text-align:center;padding:12px 8px">
+        <div id="st-min" style="font-size:19px;font-weight:900;color:var(--green2)">11.00</div>
+        <div class="sl" style="margin:2px 0 0;text-transform:uppercase;letter-spacing:.4px" data-t="min">Min</div>
+      </div>
+      <div class="card-sm" style="text-align:center;padding:12px 8px">
+        <div id="st-avg" style="font-size:19px;font-weight:900;color:var(--amber)">11.18</div>
+        <div class="sl" style="margin:2px 0 0;text-transform:uppercase;letter-spacing:.4px" data-t="moy">Moy</div>
+      </div>
+      <div class="card-sm" style="text-align:center;padding:12px 8px">
+        <div id="st-max" style="font-size:19px;font-weight:900;color:var(--red)">11.35</div>
+        <div class="sl" style="margin:2px 0 0;text-transform:uppercase;letter-spacing:.4px" data-t="max">Max</div>
+      </div>
+    </div>
+    <!-- Quick list -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="sl" style="margin:0" id="nearby-lbl">Stations proches</div>
+      <button onclick="go('list')" style="color:var(--orange);font-size:12px;font-weight:800" id="seeall-btn">Voir tout ›</button>
+    </div>
+    <div id="home-list" style="display:flex;flex-direction:column;gap:9px"></div>
+    <div class="ad-slot" style="height:60px;margin-top:14px">📢 AdMob</div>
+  </div>
+
+  <div class="bnav">
+    <button class="nb on" onclick="go('home')"><div class="nb-ic">🏠</div><span class="bnav-txt" data-t="accueil">Accueil</span></button>
+    <button class="nb" onclick="go('list')"><div class="nb-ic">📋</div><span class="bnav-txt" data-t="comparer">Comparer</span></button>
+    <button class="nb" onclick="go('map')"><div class="nb-ic">🗺️</div><span class="bnav-txt" data-t="carte">Carte</span></button>
+    <button class="nb" onclick="go('trip')"><div class="nb-ic">🚗</div><span class="bnav-txt" data-t="voyage">Voyage</span></button>
+    <button class="nb" onclick="go('profile')"><div class="nb-ic">👤</div><span class="bnav-txt" data-t="profil">Profil</span></button>
+  </div>
+</div>
+
+<!-- ████████████████ SCREEN: LIST ████████████████ -->
+<div class="screen" id="s-list">
+  <div class="sbar"><span>9:41</span><span>🔋 87%</span></div>
+  <div class="nhdr">
+    <div class="hrow">
+      <button class="ibbtn" onclick="go('home')">←</button>
+      <div style="text-align:center">
+        <div class="htitle" id="lt-title">Stations · Gasoil</div>
+        <div class="hsub" id="lt-sub">Casablanca · 7 résultats</div>
+      </div>
+      <div style="width:34px"></div>
+    </div>
+    <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none">
+      <div class="chip on" id="srt-pr" onclick="setSort('price',this)" data-t="prix">💰 Prix</div>
+      <div class="chip" id="srt-di" onclick="setSort('dist',this)" data-t="distance">📍 Distance</div>
+      <div class="chip" id="srt-fr" onclick="setSort('fresh',this)" data-t="fiabilite">✅ Fiabilité</div>
+    </div>
+  </div>
+  <div class="sb-body" style="padding:12px 14px 90px">
+    <div class="chips" id="dist-chips" style="margin-bottom:12px">
+      <div class="chip bl" onclick="setDist(1,this)">1km</div>
+      <div class="chip bl on" onclick="setDist(3,this)">3km</div>
+      <div class="chip bl" onclick="setDist(5,this)">5km</div>
+      <div class="chip bl" onclick="setDist(10,this)">10km</div>
+      <div class="chip bl" onclick="setDist(99,this)" data-t="tout">Tout</div>
+    </div>
+    <div class="card-sm" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:6px">
+        <span>Min <strong id="rng-min" style="color:var(--green2)">11.00</strong></span>
+        <span id="ecart-lbl">Écart</span> <strong id="rng-sp" style="color:var(--amber)">0.35</strong>
+        <span>Max <strong id="rng-max" style="color:var(--red)">11.35</strong></span>
+      </div>
+      <div class="prog"><div class="pf" style="width:100%;background:linear-gradient(90deg,var(--green2),var(--amber),var(--red))"></div></div>
+    </div>
+    <div id="slist" style="display:flex;flex-direction:column;gap:9px"></div>
+  </div>
+  <div class="bnav">
+    <button class="nb" onclick="go('home')"><div class="nb-ic">🏠</div><span class="bnav-txt" data-t="accueil">Accueil</span></button>
+    <button class="nb on"><div class="nb-ic">📋</div><span class="bnav-txt" data-t="comparer">Comparer</span></button>
+    <button class="nb" onclick="go('map')"><div class="nb-ic">🗺️</div><span class="bnav-txt" data-t="carte">Carte</span></button>
+    <button class="nb" onclick="go('trip')"><div class="nb-ic">🚗</div><span class="bnav-txt" data-t="voyage">Voyage</span></button>
+    <button class="nb" onclick="go('profile')"><div class="nb-ic">👤</div><span class="bnav-txt" data-t="profil">Profil</span></button>
+  </div>
+</div>
+
+<!-- ████████████████ SCREEN: DETAIL ████████████████ -->
+<div class="screen" id="s-detail">
+  <div class="sbar"><span>9:41</span><span>🔋 87%</span></div>
+  <div style="background:linear-gradient(155deg,var(--navy),var(--navy3));padding:14px 16px 18px;flex-shrink:0;position:relative;overflow:hidden">
+    <div style="position:absolute;top:14px;right:14px;font-size:80px;opacity:.08;pointer-events:none" id="d-emoji">🟠</div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+      <button class="ibbtn" onclick="goBack()">←</button>
+      <div style="display:flex;gap:8px">
+        <button class="ibbtn" onclick="toast('📸','3 photos','inf')">📸</button>
+        <button class="ibbtn" onclick="shareStation()">📤</button>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div>
+        <div style="margin-bottom:7px"><span class="tag tg" id="d-vtag">✓ Vérifié</span></div>
+        <div id="d-name" style="font-size:22px;font-weight:900;color:#fff">Afriquia</div>
+        <div id="d-addr" style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">📍 Casablanca · 1.2km</div>
+      </div>
+      <div style="text-align:right">
+        <div id="d-price" style="font-size:34px;font-weight:900;color:#22c55e;letter-spacing:-1.5px;line-height:1">11.05</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px" id="d-madl">MAD/L</div>
+      </div>
+    </div>
+  </div>
+  <div class="sb-body" style="padding:14px 14px 90px">
+    <div class="sl" id="all-prices-lbl" style="margin-bottom:8px">⛽ Tous les prix</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:16px">
+      <div class="pc on" id="pc-g"><div style="font-size:18px;margin-bottom:4px">🔵</div><div id="pc-gv" style="font-size:17px;font-weight:900">11.05</div><div class="sl" style="font-size:9px;margin:2px 0 0" data-t="gasoil">Gasoil</div></div>
+      <div class="pc" id="pc-e"><div style="font-size:18px;margin-bottom:4px">🟢</div><div id="pc-ev" style="font-size:17px;font-weight:900">12.90</div><div class="sl" style="font-size:9px;margin:2px 0 0" data-t="essence">Essence</div></div>
+      <div class="pc" id="pc-p"><div style="font-size:18px;margin-bottom:4px">🟡</div><div id="pc-pv" style="font-size:17px;font-weight:900">5.65</div><div class="sl" style="font-size:9px;margin:2px 0 0" data-t="gpl">GPL</div></div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="sl" id="rating-lbl" style="margin-bottom:10px">⭐ Note communauté</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div class="stars">★★★★½</div>
+        <div style="font-size:18px;font-weight:900">4.5</div>
+        <div style="font-size:11px;color:var(--text3)">· 142 <span data-t="avis">avis</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="btn-gh" id="vup" onclick="vote('up')" style="padding:10px;font-size:12px">👍 <span data-t="correct">Prix correct</span></button>
+        <button class="btn-gh" id="vdown" onclick="vote('down')" style="padding:10px;font-size:12px">❌ <span data-t="incorrect">Incorrect</span></button>
+      </div>
+    </div>
+    <div class="sl" id="svcs-lbl" style="margin-bottom:8px">🛠️ Services</div>
+    <div id="d-svcs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px"></div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="sl" id="hist-lbl" style="margin-bottom:10px">📈 Historique 7 jours</div>
+      <div id="hbars" style="display:flex;align-items:flex-end;gap:4px;height:48px;margin-bottom:6px"></div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3)" id="days-row">
+        <span data-t="lun">Lun</span><span data-t="mar">Mar</span><span data-t="mer">Mer</span><span data-t="jeu">Jeu</span><span data-t="ven">Ven</span><span data-t="sam">Sam</span><span style="color:var(--orange);font-weight:800" data-t="auj">Auj.</span>
+      </div>
+    </div>
+    <button class="btn-gh" style="margin-bottom:9px" onclick="showUpdate()" id="update-btn">📸 <span data-t="update">Mettre à jour le prix</span></button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+      <button class="btn-nv" onclick="doNav(event,'detail')">🗺️ Google Maps</button>
+      <button class="btn-gh" onclick="toast('🚗','Waze lancé','inf')">🚗 Waze</button>
+    </div>
+  </div>
+  <div class="bnav">
+    <button class="nb" onclick="go('home')"><div class="nb-ic">🏠</div><span class="bnav-txt" data-t="accueil">Accueil</span></button>
+    <button class="nb on"><div class="nb-ic">📋</div><span class="bnav-txt" data-t="comparer">Comparer</span></button>
+    <button class="nb" onclick="go('map')"><div class="nb-ic">🗺️</div><span class="bnav-txt" data-t="carte">Carte</span></button>
+    <button class="nb" onclick="go('trip')"><div class="nb-ic">🚗</div><span class="bnav-txt" data-t="voyage">Voyage</span></button>
+    <button class="nb" onclick="go('profile')"><div class="nb-ic">👤</div><span class="bnav-txt" data-t="profil">Profil</span></button>
+  </div>
+</div>
+
+<!-- ████████████████ SCREEN: MAP ████████████████ -->
+<div class="screen" id="s-map">
+  <div class="sbar"><span>9:41</span><span>🔋 87%</span></div>
+  <div class="nhdr">
+    <div class="hrow" style="margin-bottom:10px">
+      <div class="htitle" id="map-title">🗺️ Carte</div>
+      <button class="ibbtn" onclick="locateMe()">📍</button>
+    </div>
+    <div class="seg" id="map-seg" style="margin-bottom:9px">
+      <button class="sb on" onclick="setMapFuel('Gasoil',this)">🔵 <span data-t="gasoil">Gasoil</span></button>
+      <button class="sb" onclick="setMapFuel('Essence',this)">🟢 <span data-t="essence">Essence</span></button>
+      <button class="sb" onclick="setMapFuel('GPL',this)">🟡 <span data-t="gpl">GPL</span></button>
+    </div>
+    <div style="display:flex;gap:6px">
+      <div class="chip bl" onclick="mapDist(this)" style="padding:5px 11px;font-size:11px">1km</div>
+      <div class="chip bl on" onclick="mapDist(this)" style="padding:5px 11px;font-size:11px">3km</div>
+      <div class="chip bl" onclick="mapDist(this)" style="padding:5px 11px;font-size:11px">5km</div>
+      <div class="chip bl" onclick="mapDist(this)" style="padding:5px 11px;font-size:11px">10km</div>
+    </div>
+  </div>
+  <div class="map-area" id="map-area">
+    <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.07">
+      <defs><pattern id="gg" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M 28 0 L 0 0 0 28" fill="none" stroke="#0B1D35" stroke-width=".6"/></pattern></defs>
+      <rect width="100%" height="100%" fill="url(#gg)"/>
+    </svg>
+    <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.15" viewBox="0 0 400 300">
+      <path d="M0,150 Q80,90 200,130 T400,110" fill="none" stroke="#4A6080" stroke-width="10" stroke-linecap="round"/>
+      <path d="M0,210 Q100,190 200,205 T400,190" fill="none" stroke="#4A6080" stroke-width="7" stroke-linecap="round"/>
+      <path d="M200,0 Q205,90 195,150 T200,300" fill="none" stroke="#4A6080" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <div style="position:absolute;bottom:10px;left:10px;background:rgba(255,255,255,.92);border-radius:10px;padding:8px 12px" id="map-legend">
+      <div class="sl" style="font-size:8px;margin-bottom:5px" data-t="prix">Prix</div>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div style="display:flex;align-items:center;gap:6px;font-size:9px;font-weight:700;color:var(--text2)"><div style="width:8px;height:8px;border-radius:50%;background:var(--green2)"></div><span data-t="bas">Bas</span></div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:9px;font-weight:700;color:var(--text2)"><div style="width:8px;height:8px;border-radius:50%;background:var(--amber)"></div><span data-t="moyen">Moyen</span></div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:9px;font-weight:700;color:var(--text2)"><div style="width:8px;height:8px;border-radius:50%;background:var(--red)"></div><span data-t="eleve">Élevé</span></div>
+      </div>
+    </div>
+    <div style="position:absolute;bottom:10px;right:10px;font-size:9px;color:var(--text3);background:rgba(255,255,255,.85);padding:3px 8px;border-radius:6px">© Google Maps</div>
+    <div id="map-pins"></div>
+    <div class="udot"><div class="ui"></div></div>
+  </div>
+  <div id="map-sel" style="display:none;background:var(--white);border-top:2px solid var(--green);padding:12px 14px;flex-shrink:0"></div>
+  <div class="bnav">
+    <button class="nb" onclick="go('home')"><div class="nb-ic">🏠</div><span class="bnav-txt" data-t="accueil">Accueil</span></button>
+    <button class="nb" onclick="go('list')"><div class="nb-ic">📋</div><span class="bnav-txt" data-t="comparer">Comparer</span></button>
+    <button class="nb on"><div class="nb-ic">🗺️</div><span class="bnav-txt" data-t="carte">Carte</span></button>
+    <button class="nb" onclick="go('trip')"><div class="nb-ic">🚗</div><span class="bnav-txt" data-t="voyage">Voyage</span></button>
+    <button class="nb" onclick="go('profile')"><div class="nb-ic">👤</div><span class="bnav-txt" data-t="profil">Profil</span></button>
+  </div>
+</div>
+
+<!-- ████████████████ SCREEN: TRIP ████████████████ -->
+<div class="screen" id="s-trip">
+  <div class="sbar"><span>9:41</span><span>🔋 87%</span></div>
+  <div class="nhdr">
+    <div class="htitle" id="trip-title">🚗 Mode Voyage</div>
+    <div class="hsub" id="trip-sub">Calculez et partagez</div>
+  </div>
+  <div class="sb-body" style="padding:14px 14px 90px">
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:grid;grid-template-columns:1fr 44px 1fr;gap:8px;align-items:end;margin-bottom:12px">
+        <div>
+          <div class="sl" style="margin-bottom:7px" data-t="depart" id="dep-lbl">🚦 Départ</div>
+          <select class="inp" id="t-from" onchange="updDist()" style="font-size:13px">
+            <option>Agadir</option><option>Casablanca</option><option>Fès</option>
+            <option>Marrakech</option><option>Meknès</option><option>Oujda</option>
+            <option>Rabat</option><option>Tanger</option>
+          </select>
+        </div>
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--orange-lt);display:flex;align-items:center;justify-content:center;font-size:20px;border:1.5px solid rgba(245,98,15,.2)">→</div>
+        <div>
+          <div class="sl" style="margin-bottom:7px" id="arr-lbl">🏁 Arrivée</div>
+          <select class="inp" id="t-to" onchange="updDist()" style="font-size:13px">
+            <option>Casablanca</option><option>Agadir</option><option>Fès</option>
+            <option>Marrakech</option><option>Meknès</option><option>Oujda</option>
+            <option>Rabat</option><option>Tanger</option>
+          </select>
+        </div>
+      </div>
+      <div style="background:linear-gradient(135deg,var(--navy),var(--navy3));border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:12px;color:rgba(255,255,255,.65)" id="dist-lbl">📍 Distance estimée</span>
+        <span id="t-dist" style="font-size:18px;font-weight:900;color:#22c55e">240 km</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px">
+        <div>
+          <div class="sl" style="margin-bottom:7px" id="fuel-lbl-t">⛽ Carburant</div>
+          <select class="inp" id="t-fuel" style="font-size:13px">
+            <option>Gasoil</option><option>Essence</option><option>GPL</option>
+          </select>
+        </div>
+        <div>
+          <div class="sl" style="margin-bottom:7px" id="conso-lbl">🔧 L/100km</div>
+          <input class="inp" type="number" id="t-conso" value="7" min="1" max="30" style="font-size:16px;font-weight:800"/>
+        </div>
+        <div>
+          <div class="sl" style="margin-bottom:7px" id="pax-lbl">👥 Passagers</div>
+          <input class="inp" type="number" id="t-pax" value="2" min="1" max="8" style="font-size:16px;font-weight:800"/>
+        </div>
+        <div>
+          <div class="sl" style="margin-bottom:7px" id="tank-lbl">🛢️ Réservoir L</div>
+          <input class="inp" type="number" id="t-tank" value="60" min="20" max="100" style="font-size:16px;font-weight:800"/>
+        </div>
+      </div>
+      <button class="btn-or" onclick="calcTrip()" id="calc-btn">⛽ <span data-t="calculer">Calculer le coût</span></button>
+    </div>
+    <div id="trip-res"></div>
+  </div>
+  <div class="bnav">
+    <button class="nb" onclick="go('home')"><div class="nb-ic">🏠</div><span class="bnav-txt" data-t="accueil">Accueil</span></button>
+    <button class="nb" onclick="go('list')"><div class="nb-ic">📋</div><span class="bnav-txt" data-t="comparer">Comparer</span></button>
+    <button class="nb" onclick="go('map')"><div class="nb-ic">🗺️</div><span class="bnav-txt" data-t="carte">Carte</span></button>
+    <button class="nb on"><div class="nb-ic">🚗</div><span class="bnav-txt" data-t="voyage">Voyage</span></button>
+    <button class="nb" onclick="go('profile')"><div class="nb-ic">👤</div><span class="bnav-txt" data-t="profil">Profil</span></button>
+  </div>
+</div>
+
+<!-- ████████████████ SCREEN: PROFILE ████████████████ -->
+<div class="screen" id="s-profile">
+  <div class="sbar"><span>9:41</span><span>🔋 87%</span></div>
+  <div class="nhdr">
+    <div class="htitle" id="profile-title" style="margin-bottom:14px">👤 Mon Profil</div>
+    <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px">
+      <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange2));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:2px solid rgba(255,255,255,.2)">👤</div>
+      <div style="flex:1">
+        <div style="font-size:15px;font-weight:900;color:#fff">Ahmed_Casa</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">🥉 <span data-t="explorateur">Explorateur</span> · Rang #3</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:20px;font-weight:900;color:var(--orange)">340</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.4)" data-t="pts">pts Éco</div>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,.4);margin-bottom:5px">
+        <span>340 pts</span><span id="next-lbl">Prochain : 500 pts</span>
+      </div>
+      <div style="height:5px;background:rgba(255,255,255,.12);border-radius:5px;overflow:hidden">
+        <div style="width:68%;height:100%;background:linear-gradient(90deg,var(--orange),#f5820f);border-radius:5px"></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px">
+      <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:9px;text-align:center"><div style="font-weight:900;font-size:14px;color:#fff">22</div><div style="font-size:8px;color:rgba(255,255,255,.45);margin-top:2px" data-t="signalements">Signalements</div></div>
+      <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:9px;text-align:center"><div style="font-weight:900;font-size:14px;color:#fff">51</div><div style="font-size:8px;color:rgba(255,255,255,.45);margin-top:2px" data-t="votes_recus">Votes reçus</div></div>
+      <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:9px;text-align:center"><div style="font-weight:900;font-size:14px;color:#fff">430 MAD</div><div style="font-size:8px;color:rgba(255,255,255,.45);margin-top:2px" data-t="eco">Éco générée</div></div>
+    </div>
+  </div>
+  <div class="sb-body" style="padding:14px 14px 90px">
+    <!-- Language section -->
+    <div class="sl" id="lang-section-lbl" style="margin-bottom:10px">🌐 <span data-t="langue">Langue / اللغة</span></div>
+    <div style="background:var(--white);border-radius:18px;box-shadow:var(--shadow);border:2px solid var(--orange);padding:16px;margin-bottom:16px">
+      <div style="display:flex;gap:10px;margin-bottom:12px">
+        <button id="langbig-fr" onclick="setLang('fr')" style="flex:1;padding:16px 8px;border-radius:14px;border:2px solid var(--orange);background:var(--orange);color:#fff;font-size:16px;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .18s">
+          <span style="font-size:28px">🇫🇷</span>
+          <span>Français</span>
+        </button>
+        <button id="langbig-ar" onclick="setLang('ar')" style="flex:1;padding:16px 8px;border-radius:14px;border:2px solid var(--border);background:var(--off2);color:var(--text2);font-size:16px;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .18s">
+          <span style="font-size:28px">🇲🇦</span>
+          <span style="font-family:var(--ff-ar);font-size:18px">العربية</span>
+        </button>
+      </div>
+      <div style="font-size:11px;color:var(--text3);text-align:center" id="lang-note">Choisissez votre langue / اختر لغتك</div>
+    </div>
+
+    <!-- Badges -->
+    <div class="sl" id="badges-lbl" style="margin-bottom:10px">🏅 <span data-t="badges">Mes badges</span></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
+      <div class="badge-c"><div style="font-size:24px;margin-bottom:4px">🏅</div><div style="font-size:9px;color:var(--text3);font-weight:700;line-height:1.3" data-t="b1">1er signalement</div></div>
+      <div class="badge-c"><div style="font-size:24px;margin-bottom:4px">🔥</div><div style="font-size:9px;color:var(--text3);font-weight:700;line-height:1.3" data-t="b2">5 rapports</div></div>
+      <div class="badge-c"><div style="font-size:24px;margin-bottom:4px">📸</div><div style="font-size:9px;color:var(--text3);font-weight:700;line-height:1.3" data-t="b3">Photo vérif.</div></div>
+      <div class="badge-c" style="opacity:.4"><div style="font-size:24px;margin-bottom:4px">⭐</div><div style="font-size:9px;color:var(--text3);font-weight:700;line-height:1.3" data-t="b4">10 votes</div></div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="sl" id="notifs-lbl" style="margin-bottom:10px">🔔 <span data-t="alertes">Alertes de prix</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+      <div class="card-sm" style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">⛽</span><div style="flex:1"><div style="font-size:12px;font-weight:700"><span data-t="gasoil">Gasoil</span> &lt; 11.00 MAD/L</div><div style="font-size:10px;color:var(--text3);margin-top:1px">2km</div></div><div class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div>
+      <div class="card-sm" style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">🟢</span><div style="flex:1"><div style="font-size:12px;font-weight:700"><span data-t="essence">Essence</span> &lt; 12.90 MAD/L</div><div style="font-size:10px;color:var(--text3);margin-top:1px">Casablanca</div></div><div class="tog off" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div>
+      <div class="card-sm" style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">📍</span><div style="flex:1"><div style="font-size:12px;font-weight:700" data-t="auto_alert">Station moins chère proche</div><div style="font-size:10px;color:var(--text3);margin-top:1px" data-t="geo">Géolocalisation</div></div><div class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div>
+    </div>
+
+    <!-- Settings -->
+    <div class="sl" id="settings-lbl" style="margin-bottom:10px">⚙️ <span data-t="parametres">Paramètres</span></div>
+    <div class="card" style="padding:4px 0;margin-bottom:14px">
+      <div onclick="toast('🔐','Disponible prochainement','inf')" style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer">
+        <div style="width:32px;height:32px;border-radius:9px;background:var(--blue-lt);display:flex;align-items:center;justify-content:center;font-size:16px">🔐</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:700" data-t="compte">Compte & Sécurité</div></div><span style="font-size:16px;color:var(--text3)">›</span>
+      </div>
+      <div onclick="shareApp()" style="display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer">
+        <div style="width:32px;height:32px;border-radius:9px;background:var(--orange-lt);display:flex;align-items:center;justify-content:center;font-size:16px">📢</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:700" data-t="partager">Partager l'app</div></div><span style="font-size:16px;color:var(--text3)">›</span>
+      </div>
+    </div>
+    <div class="ad-slot" style="height:70px">📢 AdMob</div>
+  </div>
+  <div class="bnav">
+    <button class="nb" onclick="go('home')"><div class="nb-ic">🏠</div><span class="bnav-txt" data-t="accueil">Accueil</span></button>
+    <button class="nb" onclick="go('list')"><div class="nb-ic">📋</div><span class="bnav-txt" data-t="comparer">Comparer</span></button>
+    <button class="nb" onclick="go('map')"><div class="nb-ic">🗺️</div><span class="bnav-txt" data-t="carte">Carte</span></button>
+    <button class="nb" onclick="go('trip')"><div class="nb-ic">🚗</div><span class="bnav-txt" data-t="voyage">Voyage</span></button>
+    <button class="nb on"><div class="nb-ic">👤</div><span class="bnav-txt" data-t="profil">Profil</span></button>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<script>
+/* ══════════════════════════════════════════════
+   TRANSLATIONS
+══════════════════════════════════════════════ */
+const TRANS = {
+  fr: {
+    // Nav
+    accueil:"Accueil", comparer:"Comparer", carte:"Carte", voyage:"Voyage", profil:"Profil",
+    // Fuel
+    gasoil:"Gasoil", essence:"Essence", gpl:"GPL",
+    // Home
+    min:"Min", moy:"Moy", max:"Max",
+    nearby:"Stations proches", seeall:"Voir tout ›",
+    yaller:"Y aller", details:"Détails",
+    greeting:"Bonjour 👋",
+    // Stations / Detail
+    best_tag:"⭐ Meilleur prix", verif:"✓ Vérifié", verif_votes:"✓ Vérifié · {v} votes",
+    all_prices:"⛽ Tous les prix", rating:"⭐ Note communauté",
+    avis:"avis", correct:"Prix correct", incorrect:"Incorrect",
+    services:"🛠️ Services", hist:"📈 Historique 7 jours",
+    lun:"Lun", mar:"Mar", mer:"Mer", jeu:"Jeu", ven:"Ven", sam:"Sam", auj:"Auj.",
+    update:"Mettre à jour le prix",
+    // List
+    resultats:"{n} résultat{s}", ecart:"Écart", tout:"Tout",
+    prix:"💰 Prix", distance:"📍 Distance", fiabilite:"✅ Fiabilité",
+    no_station:"Aucune station trouvée", enlarge:"Élargissez le rayon",
+    // Map
+    map_title:"🗺️ Carte", bas:"Bas", moyen:"Moyen", eleve:"Élevé",
+    // Trip
+    trip_title:"🚗 Mode Voyage", trip_sub:"Calculez et partagez",
+    depart:"🚦 Départ", arrivee:"🏁 Arrivée",
+    dist_est:"📍 Distance estimée", calculer:"Calculer le coût",
+    carburant:"⛽ Carburant", conso:"🔧 L/100km",
+    passagers:"👥 Passagers", reservoir:"🛢️ Réservoir L",
+    conseil:"Conseil intelligent", tiktok:"📱 Les gens partagent ça sur TikTok !",
+    best_price:"MEILLEUR PRIX", economie:"ÉCONOMIE",
+    copier:"📋 Copier", arret_needed:"⚠️ Arrêt carburant nécessaire",
+    // Profile
+    profile_title:"👤 Mon Profil",
+    explorateur:"Explorateur", pts:"pts Éco",
+    next_level:"Prochain : 500 pts",
+    badges:"Mes badges",
+    b1:"1er signalement", b2:"5 rapports", b3:"Photo vérif.", b4:"10 votes",
+    alertes:"Alertes de prix",
+    auto_alert:"Station moins chère proche", geo:"Géolocalisation",
+    parametres:"Paramètres", compte:"Compte & Sécurité", partager:"Partager l'app",
+    signalements:"Signalements", votes_recus:"Votes reçus", eco:"Éco générée",
+    langue:"Langue / اللغة",
+    // Toast
+    t_ville:"📍 Ville", t_loc_search:"Recherche en cours…",
+    t_loc_found:"km — {f} {p} MAD/L",
+    t_nav:"Navigation lancée",
+    t_copied:"Résultat copié !",
+    t_signale:"Signalé ! +10 pts",
+    t_merci:"Prix confirmé — +5 pts Éco",
+    t_incorrect:"Prix incorrect signalé. Merci !",
+    t_annule:"Vote retiré",
+    // Services
+    svc_cafe:"Café", svc_lavage:"Lavage", svc_mosquee:"Mosquée",
+    svc_wc:"Toilettes", svc_shop:"Shop",
+    // Station card
+    meilleur:"⭐ Meilleur", plus_cher:"↑ Plus cher", ref:"↓ Réf.",
+    madl:"MAD/L",
+    // Search placeholder
+    search_ph:"Station, quartier…",
+    // City dropdown label
+    city_lbl:"📍",
+  },
+  ar: {
+    // Nav
+    accueil:"الرئيسية", comparer:"مقارنة", carte:"الخريطة", voyage:"السفر", profil:"ملفي",
+    // Fuel
+    gasoil:"غازوال", essence:"بنزين", gpl:"غاز",
+    // Home
+    min:"أدنى", moy:"متوسط", max:"أقصى",
+    nearby:"المحطات القريبة", seeall:"عرض الكل ›",
+    yaller:"اذهب الآن", details:"التفاصيل",
+    greeting:"أهلاً 👋",
+    // Stations / Detail
+    best_tag:"⭐ أفضل سعر", verif:"✓ موثّق", verif_votes:"✓ موثّق · {v} صوت",
+    all_prices:"⛽ جميع الأسعار", rating:"⭐ تقييم المجتمع",
+    avis:"تقييم", correct:"السعر صحيح", incorrect:"غير صحيح",
+    services:"🛠️ الخدمات", hist:"📈 تاريخ 7 أيام",
+    lun:"إث", mar:"ثل", mer:"أرب", jeu:"خم", ven:"جم", sam:"سب", auj:"اليوم",
+    update:"تحديث السعر",
+    // List
+    resultats:"{n} نتيجة", ecart:"الفارق", tout:"الكل",
+    prix:"💰 السعر", distance:"📍 المسافة", fiabilite:"✅ الموثوقية",
+    no_station:"لا توجد محطات", enlarge:"وسّع نطاق البحث",
+    // Map
+    map_title:"🗺️ الخريطة", bas:"منخفض", moyen:"متوسط", eleve:"مرتفع",
+    // Trip
+    trip_title:"🚗 وضع السفر", trip_sub:"احسب وشارك التكلفة",
+    depart:"🚦 نقطة الانطلاق", arrivee:"🏁 الوجهة",
+    dist_est:"📍 المسافة التقريبية", calculer:"احسب التكلفة",
+    carburant:"⛽ الوقود", conso:"🔧 ل/100كم",
+    passagers:"👥 المسافرون", reservoir:"🛢️ خزان الوقود",
+    conseil:"نصيحة ذكية", tiktok:"📱 يتداول الناس هذا على تيك توك!",
+    best_price:"أفضل سعر", economie:"التوفير",
+    copier:"📋 نسخ", arret_needed:"⚠️ توقف للتزود بالوقود ضروري",
+    // Profile
+    profile_title:"👤 ملفي الشخصي",
+    explorateur:"مستكشف", pts:"نقطة اقتصادية",
+    next_level:"المستوى التالي: 500 نقطة",
+    badges:"شاراتي",
+    b1:"أول إبلاغ", b2:"5 تقارير", b3:"صورة موثّقة", b4:"10 أصوات",
+    alertes:"تنبيهات الأسعار",
+    auto_alert:"أقرب محطة أرخص", geo:"تحديد الموقع",
+    parametres:"الإعدادات", compte:"الحساب والأمان", partager:"مشاركة التطبيق",
+    signalements:"التقارير", votes_recus:"الأصوات المستلمة", eco:"التوفير المحقق",
+    langue:"اللغة / Langue",
+    // Toast
+    t_ville:"📍 المدينة", t_loc_search:"جارٍ البحث…",
+    t_loc_found:"كم — {f} {p} درهم/ل",
+    t_nav:"تم تشغيل الملاحة",
+    t_copied:"تم النسخ !",
+    t_signale:"تم الإبلاغ ! +10 نقاط",
+    t_merci:"تم تأكيد السعر — +5 نقاط",
+    t_incorrect:"تم الإبلاغ عن سعر خاطئ. شكراً!",
+    t_annule:"تم إلغاء التصويت",
+    // Services
+    svc_cafe:"مقهى", svc_lavage:"غسيل", svc_mosquee:"مسجد",
+    svc_wc:"دورة مياه", svc_shop:"متجر",
+    // Station card
+    meilleur:"⭐ الأفضل", plus_cher:"↑ الأغلى", ref:"↓ مرجع",
+    madl:"درهم/ل",
+    // Search
+    search_ph:"محطة، حي، مدينة…",
+    city_lbl:"📍",
+  }
+};
+
+// Arabic city names map
+const CITIES_AR = {
+  "Casablanca":"الدار البيضاء","Rabat":"الرباط","Fès":"فاس",
+  "Marrakech":"مراكش","Tanger":"طنجة","Agadir":"أكادير",
+  "Meknès":"مكناس","Oujda":"وجدة"
+};
+
+/* ══════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════ */
+const ST=[
+  {id:0,n:"Appolo",   e:"🟣",bg:"#f3e8ff",c:"Casablanca",G:11.00,E:12.88,P:5.62,d:0.6,v:63, ok:true, up:"45min",sv:["☕","🧼","🚽"]},
+  {id:1,n:"Afriquia", e:"🟠",bg:"#fff7e0",c:"Casablanca",G:11.05,E:12.90,P:5.65,d:1.2,v:142,ok:true, up:"30min",sv:["☕","🕌","🏪","🚽"]},
+  {id:2,n:"Shell",    e:"🟡",bg:"#fefce8",c:"Casablanca",G:11.15,E:13.00,P:5.75,d:1.8,v:77, ok:true, up:"1h",   sv:["☕","🧼","🚽","🏪"]},
+  {id:3,n:"Winxo",   e:"🔵",bg:"#e0f2fe",c:"Casablanca",G:11.10,E:12.95,P:5.70,d:2.4,v:31, ok:false,up:"6h",   sv:["🚽"]},
+  {id:4,n:"Ola Energy",e:"🟠",bg:"#fff0e8",c:"Casablanca",G:11.25,E:13.08,P:5.85,d:2.8,v:89,ok:true, up:"2h",  sv:["☕","🧼","🕌","🚽","🏪"]},
+  {id:5,n:"Petrom",  e:"🟢",bg:"#e4f9f2",c:"Casablanca",G:11.35,E:13.15,P:5.95,d:3.5,v:55, ok:true, up:"3h",  sv:["☕","🕌"]},
+  {id:6,n:"Total",   e:"🔴",bg:"#fce7f3",c:"Casablanca",G:11.30,E:13.10,P:5.90,d:4.2,v:98, ok:true, up:"4h",  sv:["☕","🚽"]},
+  {id:7,n:"Afriquia", e:"🟠",bg:"#fff7e0",c:"Rabat",G:11.18,E:13.02,P:5.78,d:1.0,v:112,ok:true, up:"1h",sv:["☕","🕌","🚽"]},
+  {id:8,n:"Total",   e:"🔴",bg:"#fce7f3",c:"Rabat",G:11.28,E:13.12,P:5.88,d:2.4,v:74, ok:true, up:"2h",sv:["☕","🚽"]},
+  {id:9,n:"Appolo",  e:"🟣",bg:"#f3e8ff",c:"Rabat",G:11.02,E:12.88,P:5.62,d:0.8,v:39, ok:true, up:"5h",sv:["🧼","🚽"]},
+  {id:10,n:"Winxo",  e:"🔵",bg:"#e0f2fe",c:"Rabat",G:11.08,E:12.93,P:5.68,d:1.6,v:48, ok:true, up:"4h",sv:["🚽"]},
+  {id:11,n:"Afriquia",e:"🟠",bg:"#fff7e0",c:"Fès",G:11.22,E:13.08,P:5.82,d:0.9,v:95, ok:true, up:"2h",sv:["☕","🕌","🚽"]},
+  {id:12,n:"Total",  e:"🔴",bg:"#fce7f3",c:"Fès",G:11.32,E:13.14,P:5.92,d:2.2,v:67, ok:true, up:"3h",sv:["☕","🚽"]},
+  {id:13,n:"Appolo", e:"🟣",bg:"#f3e8ff",c:"Fès",G:11.08,E:12.92,P:5.68,d:1.5,v:41, ok:true, up:"1h",sv:["🧼","🚽"]},
+  {id:14,n:"Afriquia",e:"🟠",bg:"#fff7e0",c:"Marrakech",G:11.25,E:13.10,P:5.85,d:1.3,v:88,ok:true, up:"2h",sv:["☕","🕌","🏪","🚽"]},
+  {id:15,n:"Total",  e:"🔴",bg:"#fce7f3",c:"Marrakech",G:11.35,E:13.18,P:5.95,d:2.8,v:71,ok:true, up:"4h",sv:["☕","🚽"]},
+  {id:16,n:"Appolo", e:"🟣",bg:"#f3e8ff",c:"Marrakech",G:11.10,E:12.94,P:5.70,d:0.7,v:34,ok:true, up:"1h",sv:["🧼","🚽"]},
+  {id:17,n:"Afriquia",e:"🟠",bg:"#fff7e0",c:"Tanger",G:11.15,E:13.00,P:5.75,d:1.1,v:76,ok:true, up:"3h",sv:["☕","🕌","🚽"]},
+  {id:18,n:"Appolo", e:"🟣",bg:"#f3e8ff",c:"Tanger",G:11.00,E:12.86,P:5.60,d:0.5,v:44,ok:true, up:"2h",sv:["🧼","🚽"]},
+  {id:19,n:"Afriquia",e:"🟠",bg:"#fff7e0",c:"Agadir",G:11.28,E:13.12,P:5.88,d:1.4,v:67,ok:true, up:"1h",sv:["☕","🏪","🚽"]},
+  {id:20,n:"Appolo", e:"🟣",bg:"#f3e8ff",c:"Agadir",G:11.12,E:12.96,P:5.72,d:2.2,v:38,ok:true, up:"3h",sv:["🚽"]},
+  {id:21,n:"Afriquia",e:"🟠",bg:"#fff7e0",c:"Meknès",G:11.19,E:13.04,P:5.79,d:0.9,v:52,ok:true, up:"1h",sv:["☕","🕌","🚽"]},
+  {id:22,n:"Total",  e:"🔴",bg:"#fce7f3",c:"Meknès",G:11.29,E:13.11,P:5.89,d:2.1,v:44,ok:true, up:"2h",sv:["☕","🚽"]},
+  {id:23,n:"Afriquia",e:"🟠",bg:"#fff7e0",c:"Oujda",G:11.21,E:13.06,P:5.81,d:1.2,v:48,ok:true, up:"2h",sv:["☕","🕌","🚽"]},
+  {id:24,n:"Appolo", e:"🟣",bg:"#f3e8ff",c:"Oujda",G:11.04,E:12.91,P:5.66,d:0.7,v:32,ok:true, up:"1h",sv:["🚽"]},
+];
+
+const DISTS={"Agadir-Casablanca":461,"Agadir-Marrakech":247,"Agadir-Rabat":546,"Casablanca-Rabat":87,"Casablanca-Fès":302,"Casablanca-Marrakech":240,"Casablanca-Tanger":340,"Casablanca-Oujda":536,"Casablanca-Meknès":272,"Rabat-Fès":199,"Rabat-Tanger":253,"Tanger-Fès":300,"Fès-Meknès":58,"Fès-Oujda":314,"Marrakech-Agadir":247,"Marrakech-Rabat":327};
+
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+let S={city:"Casablanca",fuel:"Gasoil",lang:"fr",sort:"price",dist:3,mapFuel:"Gasoil",sel:null,prev:"home",votes:{}};
+const FK={Gasoil:'G',Essence:'E',GPL:'P'};
+function T(k){return TRANS[S.lang][k]||TRANS.fr[k]||k}
+function getP(s){return s[FK[S.fuel]]||0}
+function getCityS(city,fuel){return ST.filter(s=>s.c===city).sort((a,b)=>a[FK[fuel]||'G']-b[FK[fuel]||'G'])}
+function mm(arr,fuel){const ps=arr.map(s=>s[FK[fuel]||'G']);if(!ps.length)return{min:0,max:0,avg:0};return{min:Math.min(...ps),max:Math.max(...ps),avg:ps.reduce((a,b)=>a+b,0)/ps.length}}
+function cityName(c){return S.lang==='ar'?(CITIES_AR[c]||c):c}
+
+/* ══════════════════════════════════════════════
+   CLOCK
+══════════════════════════════════════════════ */
+function tick(){const n=new Date();document.getElementById('clk').textContent=`${n.getHours()}:${String(n.getMinutes()).padStart(2,'0')}`}
+tick();setInterval(tick,10000);
+
+/* ══════════════════════════════════════════════
+   LANGUAGE SYSTEM
+══════════════════════════════════════════════ */
+function setLang(lang){
+  S.lang=lang;
+  const isAr=lang==='ar';
+
+  // Set HTML dir & lang
+  document.documentElement.setAttribute('lang',lang);
+  document.documentElement.setAttribute('dir',isAr?'rtl':'ltr');
+
+  // Header lang buttons (small)
+  document.getElementById('lb-fr').classList.toggle('on',lang==='fr');
+  document.getElementById('lb-ar').classList.toggle('on',lang==='ar');
+
+  // Big lang buttons (profile)
+  const bfr=document.getElementById('langbig-fr');
+  const bar=document.getElementById('langbig-ar');
+  if(bfr&&bar){
+    bfr.style.border=`2px solid ${lang==='fr'?'var(--orange)':'var(--border)'}`;
+    bfr.style.background=lang==='fr'?'var(--orange)':'var(--off2)';
+    bfr.style.color=lang==='fr'?'#fff':'var(--text2)';
+    bar.style.border=`2px solid ${lang==='ar'?'var(--orange)':'var(--border)'}`;
+    bar.style.background=lang==='ar'?'var(--orange)':'var(--off2)';
+    bar.style.color=lang==='ar'?'#fff':'var(--text2)';
+  }
+
+  // Translate all data-t elements
+  document.querySelectorAll('[data-t]').forEach(el=>{
+    const k=el.getAttribute('data-t');
+    const txt=T(k);
+    if(txt)el.textContent=txt;
+  });
+
+  // Update city dropdown options with Arabic names
+  const drop=document.getElementById('city-drop');
+  if(drop){
+    Array.from(drop.options).forEach(opt=>{
+      opt.text=(isAr?'📍 ':''+ '📍 ')+(isAr?(CITIES_AR[opt.value]||opt.value):opt.value);
+    });
+  }
+
+  // Update search placeholder
+  const srch=document.getElementById('srch-inp');
+  if(srch)srch.placeholder=T('search_ph');
+
+  // Update fuel seg buttons text
+  ['g','e','p'].forEach((k,i)=>{
+    const fkeys=['gasoil','essence','gpl'];
+    const btn=document.getElementById('fb-'+k);
+    if(btn){
+      const icons=['🔵','🟢','🟡'];
+      btn.textContent=icons[i]+' '+T(fkeys[i]);
+    }
+  });
+
+  // Re-render current screen to update dynamic content
+  const active=document.querySelector('.screen.active')?.id?.replace('s-','');
+  if(active==='home')renderHome();
+  if(active==='list')renderList();
+  if(active==='detail'&&S.sel)renderDetail(S.sel);
+  if(active==='map')renderMap();
+
+  // Toast
+  toast(isAr?'🇲🇦 العربية':'🇫🇷 Français',isAr?'تم تغيير اللغة إلى العربية':'Langue changée en français');
+}
+
+/* ══════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════ */
+function go(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+name)?.classList.add('active');
+  if(name==='list')renderList();
+  if(name==='map')renderMap();
+  if(name==='home')renderHome();
+}
+function goBack(){go(S.prev||'list')}
+function openDetail(id){
+  const s=typeof id==='number'?ST.find(x=>x.id===id):id;
+  if(!s)return;
+  S.sel=s;
+  S.prev=document.querySelector('.screen.active')?.id?.replace('s-','')||'home';
+  renderDetail(s);
+  go('detail');
+}
+
+/* ══════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════ */
+let tid=0;
+function toast(title,msg,type='ok'){
+  const id=++tid;
+  const ic={ok:'✅',er:'❌',inf:'ℹ️'};
+  const el=document.createElement('div');
+  el.className=`toast ${type}`;el.id='t'+id;
+  el.innerHTML=`<div class="ti">${ic[type]||'✅'}</div><div class="tb2"><div class="tt">${title}</div><div class="tm">${msg}</div></div><button class="tc" onclick="rmT(${id})">✕</button>`;
+  document.getElementById('toast-c').appendChild(el);
+  setTimeout(()=>rmT(id),4500);
+}
+function rmT(id){const e=document.getElementById('t'+id);if(e){e.style.opacity='0';e.style.transform='translateX(110%)';e.style.transition='all .3s';setTimeout(()=>e?.remove(),300)}}
+
+/* ══════════════════════════════════════════════
+   STATION CARD
+══════════════════════════════════════════════ */
+function mkCard(s,i,total,min,max){
+  const p=getP(s);
+  const isBest=p<=min+.001;
+  const isWorst=p>=max-.001&&total>1;
+  const diff=(p-min).toFixed(2);
+  const el=document.createElement('div');
+  el.className='sc'+(isBest?' best':'');
+  el.innerHTML=`
+    <div class="sc-logo" style="background:${s.bg}">${s.e}</div>
+    <div class="sc-info">
+      <div class="sc-name">${s.n}
+        ${isBest?`<span class="tag tg">${T('meilleur')}</span>`:''}
+        ${s.ok&&!isBest?'<span style="font-size:10px;color:var(--green2)">✓</span>':''}
+        ${isWorst?`<span class="tag tr">${T('plus_cher')}</span>`:''}
+      </div>
+      <div class="sc-meta">📍 ${s.d}km · ⏱ ${s.up} · 👍 ${s.v}</div>
+      <div class="sc-svc">${s.sv.slice(0,3).map(x=>`<div class="sv">${x}</div>`).join('')}</div>
+    </div>
+    <div class="sc-price">
+      <div class="sc-p" style="color:${isBest?'var(--green2)':isWorst?'var(--red)':'var(--text)'}">${p.toFixed(2)}</div>
+      <div class="sc-u">${T('madl')}</div>
+      <div class="sc-d" style="color:${isBest?'var(--green2)':'var(--amber)'}">${isBest?T('ref'):'+'+diff}</div>
+    </div>`;
+  el.onclick=()=>openDetail(s.id);
+  return el;
+}
+
+/* ══════════════════════════════════════════════
+   HOME
+══════════════════════════════════════════════ */
+function renderHome(){
+  const arr=getCityS(S.city,S.fuel);
+  const best=arr[0];
+  const {min,max,avg}=mm(arr,S.fuel);
+
+  if(best){
+    document.getElementById('h-price').textContent=getP(best).toFixed(2);
+    document.getElementById('h-name').textContent=best.e+' '+best.n;
+    document.getElementById('h-dist').textContent='📍 '+best.d+'km · '+best.up;
+    document.getElementById('h-save').textContent='💰 '+((avg-min)*40).toFixed(2)+' MAD';
+    document.getElementById('hero-card').onclick=()=>openDetail(best.id);
+  }
+
+  // Update city label
+  document.getElementById('h-city-lbl').textContent=cityName(S.city);
+
+  // Stats
+  document.getElementById('st-min').textContent=min.toFixed(2);
+  document.getElementById('st-avg').textContent=avg.toFixed(2);
+  document.getElementById('st-max').textContent=max.toFixed(2);
+
+  // Best + verified tags
+  const bt=document.getElementById('best-tag');
+  const vt=document.getElementById('verif-tag');
+  if(bt)bt.textContent=T('best_tag');
+  if(vt)vt.textContent=T('verif');
+
+  // Labels
+  const nl=document.getElementById('nearby-lbl');
+  if(nl)nl.textContent=T('nearby');
+  const sa=document.getElementById('seeall-btn');
+  if(sa)sa.textContent=T('seeall');
+  const greet=document.getElementById('h-greeting');
+  if(greet)greet.textContent=T('greeting');
+
+  // Quick list
+  const c=document.getElementById('home-list');c.innerHTML='';
+  arr.slice(0,3).forEach((s,i)=>c.appendChild(mkCard(s,i,arr.length,min,max)));
+}
+
+/* ══════════════════════════════════════════════
+   LIST
+══════════════════════════════════════════════ */
+function renderList(){
+  let arr=getCityS(S.city,S.fuel);
+  if(S.sort==='dist')arr=[...arr].sort((a,b)=>a.d-b.d);
+  if(S.sort==='fresh')arr=[...arr].sort((a,b)=>b.v-a.v);
+  arr=arr.filter(s=>s.d<=S.dist);
+  const {min,max}=mm(arr,S.fuel);
+
+  document.getElementById('lt-title').textContent=cityName(S.city)+' · '+T(S.fuel.toLowerCase());
+  const n=arr.length;
+  const res=T('resultats').replace('{n}',n).replace('{s}',n>1?'s':'');
+  document.getElementById('lt-sub').textContent=res;
+
+  document.getElementById('rng-min').textContent=min.toFixed(2);
+  document.getElementById('rng-max').textContent=max.toFixed(2);
+  document.getElementById('rng-sp').textContent=(max-min).toFixed(2)+' MAD';
+
+  // Sort labels
+  const sp=document.getElementById('srt-pr');
+  const sd=document.getElementById('srt-di');
+  const sf=document.getElementById('srt-fr');
+  if(sp)sp.textContent=T('prix');
+  if(sd)sd.textContent=T('distance');
+  if(sf)sf.textContent=T('fiabilite');
+
+  const c=document.getElementById('slist');c.innerHTML='';
+  if(!arr.length){
+    c.innerHTML=`<div style="text-align:center;padding:40px;color:var(--text3)">🔍<br><br>${T('no_station')}<br><small>${T('enlarge')}</small></div>`;
+    return;
+  }
+  arr.forEach((s,i)=>c.appendChild(mkCard(s,i,arr.length,min,max)));
+}
+
+/* ══════════════════════════════════════════════
+   DETAIL
+══════════════════════════════════════════════ */
+function renderDetail(s){
+  document.getElementById('d-name').textContent=s.n;
+  document.getElementById('d-emoji').textContent=s.e;
+  document.getElementById('d-addr').textContent='📍 '+cityName(s.c)+' · '+s.d+'km';
+  document.getElementById('d-price').textContent=getP(s).toFixed(2);
+  document.getElementById('d-madl').textContent=T('madl');
+  document.getElementById('d-vtag').textContent=
+    T('verif_votes').replace('{v}',s.v);
+
+  document.getElementById('pc-gv').textContent=s.G.toFixed(2);
+  document.getElementById('pc-ev').textContent=s.E.toFixed(2);
+  document.getElementById('pc-pv').textContent=s.P.toFixed(2);
+
+  ['g','e','p'].forEach(k=>{
+    const fMap={g:'Gasoil',e:'Essence',p:'GPL'};
+    document.getElementById('pc-'+k).className='pc'+(fMap[k]===S.fuel?' on':'');
+    document.getElementById('pc-'+k+'v').style.color=fMap[k]===S.fuel?'var(--orange2)':'var(--text)';
+  });
+
+  const SVC_MAP={'☕':'svc_cafe','🧼':'svc_lavage','🕌':'svc_mosquee','🚽':'svc_wc','🏪':'svc_shop'};
+  document.getElementById('d-svcs').innerHTML=Object.entries(SVC_MAP).map(([ic,tk])=>
+    `<div class="svc${s.sv.includes(ic)?' on':''}">${ic} ${T(tk)}</div>`
+  ).join('');
+
+  document.getElementById('hbars').innerHTML=
+    [55,65,48,72,58,80,100].map((h,i)=>
+      `<div class="hbar${i===6?' hi':''}" style="height:${h}%;flex:1;border-radius:3px 3px 0 0"></div>`
+    ).join('');
+
+  // Labels
+  const ap=document.getElementById('all-prices-lbl');if(ap)ap.textContent=T('all_prices');
+  const rl=document.getElementById('rating-lbl');if(rl)rl.textContent=T('rating');
+  const sl=document.getElementById('svcs-lbl');if(sl)sl.textContent=T('services');
+  const hl=document.getElementById('hist-lbl');if(hl)hl.textContent=T('hist');
+}
+
+/* ══════════════════════════════════════════════
+   MAP
+══════════════════════════════════════════════ */
+function renderMap(){
+  const arr=getCityS(S.city,S.mapFuel);
+  const {min,max}=mm(arr,S.mapFuel);
+  const c=document.getElementById('map-pins');c.innerHTML='';
+  const pos=[{l:'18%',t:'42%'},{l:'42%',t:'32%'},{l:'68%',t:'52%'},{l:'30%',t:'65%'},{l:'75%',t:'30%'},{l:'55%',t:'72%'},{l:'22%',t:'22%'}];
+  arr.forEach((s,i)=>{
+    if(i>=pos.length)return;
+    const p=s[FK[S.mapFuel]||'G'];
+    const col=p<=min+.05?'#059669':p>=max-.05?'#E5303B':'#F09D1A';
+    const sz=p<=min+.05?38:30;
+    const pin=document.createElement('div');
+    pin.className='pin';
+    pin.style.cssText=`left:${pos[i].l};top:${pos[i].t}`;
+    pin.innerHTML=`<div class="pin-b" style="background:${col};width:${sz}px;height:${sz}px"><span>${p.toFixed(2)}</span></div>`;
+    pin.onclick=()=>showMapSel(s);
+    c.appendChild(pin);
+  });
+
+  // Update map title
+  const mt=document.getElementById('map-title');
+  if(mt)mt.textContent=T('map_title');
+}
+
+function showMapSel(s){
+  const el=document.getElementById('map-sel');
+  const {min}=mm(getCityS(S.city,S.mapFuel),S.mapFuel);
+  const isBest=s[FK[S.mapFuel]||'G']<=min+.001;
+  const p=s[FK[S.mapFuel]||'G'];
+  el.style.display='block';
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:10px">
+    <div style="width:38px;height:38px;border-radius:10px;background:${s.bg};display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${s.e}</div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:800">${s.n} ${isBest?`<span class="tag tg">${T('meilleur')}</span>`:''}</div>
+      <div style="font-size:10px;color:var(--text3)">📍 ${s.d}km · ${s.v} votes</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:21px;font-weight:900;color:${isBest?'var(--green2)':'var(--text)'}">${p.toFixed(2)}</div>
+      <div style="font-size:9px;color:var(--text3)">${T('madl')}</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:10px">
+    <button class="btn-gr" style="padding:9px;font-size:11px" onclick="doNav(event,'${s.n}')">🗺️ ${T('yaller')}</button>
+    <button class="btn-gh" style="padding:9px;font-size:11px" onclick="openDetail(${s.id})">📋 ${T('details')}</button>
+    <button class="btn-gh" style="padding:9px;font-size:11px" onclick="toast('🚗','Waze','inf')">🚗 Waze</button>
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   TRIP
+══════════════════════════════════════════════ */
+function getDist(a,b){const k=a+'-'+b,k2=b+'-'+a;return DISTS[k]||DISTS[k2]||Math.round(150+Math.random()*300)}
+function updDist(){
+  const f=document.getElementById('t-from').value;
+  const t2=document.getElementById('t-to').value;
+  document.getElementById('t-dist').textContent=getDist(f,t2)+' km';
+}
+
+function calcTrip(){
+  const from=document.getElementById('t-from').value;
+  const to=document.getElementById('t-to').value;
+  const fuel=document.getElementById('t-fuel').value;
+  const conso=parseFloat(document.getElementById('t-conso').value)||7;
+  const pax=parseInt(document.getElementById('t-pax').value)||1;
+  const tank=parseInt(document.getElementById('t-tank').value)||60;
+  if(from===to){toast('⚠️ '+T('arrivee'),S.lang==='ar'?'الوجهة والانطلاق متطابقتان':'Départ et arrivée identiques','er');return}
+  const dist=getDist(from,to);
+  const litres=(dist/100)*conso;
+  const allS=[...ST].sort((a,b)=>a[FK[fuel]||'G']-b[FK[fuel]||'G']);
+  const bestP=allS[0]?.[FK[fuel]||'G']||11;
+  const avgP=allS.reduce((s,x)=>s+x[FK[fuel]||'G'],0)/allS.length;
+  const costBest=(litres*bestP).toFixed(2);
+  const savings=((avgP-bestP)*litres).toFixed(2);
+  const perPax=pax>1?(costBest/pax).toFixed(2):null;
+  const needStop=litres>tank;
+  const tipCities=['Kenitra','Meknès','Fès','Rabat'];
+  const tip=tipCities[Math.floor(Math.random()*tipCities.length)];
+  const fromName=S.lang==='ar'?(CITIES_AR[from]||from):from;
+  const toName=S.lang==='ar'?(CITIES_AR[to]||to):to;
+  const tipName=S.lang==='ar'?(CITIES_AR[tip]||tip):tip;
+  const el=document.getElementById('trip-res');
+  el.style.display='block';
+  el.innerHTML=`
+    <div style="background:linear-gradient(135deg,var(--navy),var(--navy3));border-radius:18px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <div style="font-size:28px;flex-shrink:0">💡</div>
+        <div>
+          <div style="font-size:13px;font-weight:900;color:#fff;margin-bottom:4px">${T('conseil')}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.75);line-height:1.6;font-family:${S.lang==='ar'?'var(--ff-ar)':'inherit'}">
+            ${S.lang==='ar'?
+              `"لا تملأ الخزان في ${fromName}. انتظر حتى ${tipName} لتوفر <strong style='color:#22c55e'>${savings} درهم</strong> !"`:
+              `"Ne faites pas le plein à ${fromName}. Attendez ${tipName} pour économiser <strong style='color:#22c55e'>${savings} MAD</strong> !"`}
+          </div>
+          <div style="font-size:10px;color:rgba(34,197,94,.8);margin-top:6px;font-weight:700">${T('tiktok')}</div>
+        </div>
+      </div>
+    </div>
+    <div class="trip-res" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,.6)">${fromName}</span>
+          <span style="color:#22c55e;font-weight:900;font-size:20px">${S.lang==='ar'?'←':'→'}</span>
+          <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,.6)">${toName}</span>
+        </div>
+        <span class="tag" style="background:rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-size:10px">${dist}km · ${litres.toFixed(1)}L</span>
+      </div>
+      <div style="text-align:center;margin-bottom:16px">
+        <div class="trip-cost">${costBest}</div>
+        <div style="font-size:14px;color:rgba(255,255,255,.55);margin-top:3px;font-family:${S.lang==='ar'?'var(--ff-ar)':'inherit'}">
+          ${S.lang==='ar'?`درهم بأفضل سعر`:`MAD au meilleur prix`}
+        </div>
+        ${perPax?`<div style="margin-top:10px;background:rgba(255,255,255,.1);border-radius:12px;padding:8px 14px;display:inline-block;font-size:13px;color:#22c55e;font-weight:700">👥 ${perPax} ${S.lang==='ar'?'درهم / شخص':'MAD / personne'}</div>`:''}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px">
+        <div style="background:rgba(10,191,126,.12);border:1px solid rgba(10,191,126,.2);border-radius:12px;padding:11px;text-align:center">
+          <div style="font-size:9px;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:3px">${T('best_price')}</div>
+          <div style="font-size:17px;font-weight:900;color:#22c55e">${costBest} MAD</div>
+        </div>
+        <div style="background:rgba(245,98,15,.12);border:1px solid rgba(245,98,15,.2);border-radius:12px;padding:11px;text-align:center">
+          <div style="font-size:9px;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:3px">${T('economie')}</div>
+          <div style="font-size:17px;font-weight:900;color:var(--orange)">${savings} MAD</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button onclick="cpTrip('${from}','${to}','${costBest}','${fuel}')" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:11px;font-size:12px;font-weight:800;cursor:pointer">${T('copier')}</button>
+        <button onclick="waTrip('${from}','${to}','${costBest}','${fuel}')" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;border:none;border-radius:12px;padding:11px;font-size:12px;font-weight:800;cursor:pointer">📱 WhatsApp</button>
+      </div>
+    </div>
+    ${needStop?`<div style="background:var(--amber-lt);border:1.5px solid var(--amber);border-radius:14px;padding:13px;margin-bottom:12px">
+      <div style="font-weight:700;font-size:12px;color:var(--amber);margin-bottom:4px">${T('arret_needed')}</div>
+      <div style="font-size:11px;color:#92400e;line-height:1.5;font-family:${S.lang==='ar'?'var(--ff-ar)':'inherit'}">
+        ${S.lang==='ar'?`خزان ${tank}ل غير كافٍ لـ ${litres.toFixed(1)}ل. خطط لتوقف.`:`Réservoir ${tank}L insuffisant pour ${litres.toFixed(1)}L. Planifiez un arrêt.`}
+      </div>
+    </div>`:''}
+    <div class="ad-slot" style="height:60px;margin-top:4px">📢 AdMob</div>`;
+  el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function cpTrip(from,to,cost,fuel){
+  const f=S.lang==='ar'?(CITIES_AR[from]||from):from;
+  const t=S.lang==='ar'?(CITIES_AR[to]||to):to;
+  const txt=S.lang==='ar'?`⛽ Fuel Maroc: ${f} ← ${t} = ${cost} درهم في ${fuel} 🇲🇦`:`⛽ Fuel Maroc: ${f} → ${t} = ${cost} MAD en ${fuel} 🇲🇦`;
+  if(navigator.clipboard)navigator.clipboard.writeText(txt);
+  toast('📋',T('t_copied'));
+}
+function waTrip(from,to,cost,fuel){
+  const f=S.lang==='ar'?(CITIES_AR[from]||from):from;
+  const t2=S.lang==='ar'?(CITIES_AR[to]||to):to;
+  const txt=S.lang==='ar'?
+    encodeURIComponent(`⛽ Fuel Maroc: ${f} → ${t2} = ${cost} درهم في ${fuel} بأفضل سعر ! 🇲🇦`):
+    encodeURIComponent(`⛽ ${f} → ${t2} : ${cost} MAD en ${fuel} au meilleur prix ! Fuel Maroc 🇲🇦`);
+  window.open('https://wa.me/?text='+txt,'_blank');
+}
+
+/* ══════════════════════════════════════════════
+   INTERACTIONS
+══════════════════════════════════════════════ */
+function setCity(city){
+  S.city=city;
+  document.getElementById('h-city-lbl').textContent=cityName(city);
+  renderHome();
+  toast(T('t_ville'),cityName(city),'inf');
+}
+
+function setFuel(fuel,el){
+  S.fuel=fuel;
+  document.querySelectorAll('#fuel-seg .sb').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  renderHome();
+}
+
+function setMapFuel(fuel,el){
+  S.mapFuel=fuel;
+  document.querySelectorAll('#map-seg .sb').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('map-sel').style.display='none';
+  renderMap();
+}
+
+function setSort(type,el){
+  S.sort=type;
+  document.querySelectorAll('#srt-pr,#srt-di,#srt-fr').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  renderList();
+}
+
+function setDist(km,el){
+  S.dist=km;
+  document.querySelectorAll('#dist-chips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  renderList();
+}
+
+function mapDist(el){
+  document.querySelectorAll('.nhdr .chip.bl').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function doSearch(val){
+  if(!val.trim()){renderHome();return}
+  const hits=ST.filter(s=>
+    s.n.toLowerCase().includes(val.toLowerCase())||
+    s.c.toLowerCase().includes(val.toLowerCase())||
+    (CITIES_AR[s.c]||'').includes(val)
+  );
+  const c=document.getElementById('home-list');c.innerHTML='';
+  if(!hits.length){c.innerHTML=`<div style="text-align:center;padding:24px;color:var(--text3)">${T('no_station')}</div>`;return}
+  const {min,max}=mm(hits,S.fuel);
+  hits.slice(0,5).forEach((s,i)=>c.appendChild(mkCard(s,i,hits.length,min,max)));
+}
+
+function locateMe(){
+  toast('📍',T('t_loc_search'),'inf');
+  setTimeout(()=>{
+    const arr=getCityS(S.city,S.fuel);
+    const b=arr[0];
+    if(b)toast('✅',b.n+' '+b.d+'km — '+getP(b).toFixed(2)+' MAD/L');
+  },1500);
+}
+
+function doNav(event,name){
+  if(event)event.stopPropagation();
+  toast('🗺️',T('t_nav')+' — Google Maps','inf');
+}
+
+function vote(dir){
+  const id=S.sel?.id;if(id===undefined)return;
+  const k=id+dir,k2=id+(dir==='up'?'down':'up');
+  if(S.votes[k]){delete S.votes[k];toast('👋',T('t_annule'),'inf')}
+  else{delete S.votes[k2];S.votes[k]=true;
+    dir==='up'?toast('👍',T('t_merci')):toast('📝',T('t_incorrect'),'inf')}
+  document.getElementById('vup').style.background=S.votes[id+'up']?'var(--green-lt)':'';
+  document.getElementById('vup').style.color=S.votes[id+'up']?'var(--green2)':'';
+  document.getElementById('vdown').style.background=S.votes[id+'down']?'var(--red-lt)':'';
+  document.getElementById('vdown').style.color=S.votes[id+'down']?'var(--red)':'';
+}
+
+function showUpdate(){
+  const s=S.sel;if(!s)return;
+  const ov=document.createElement('div');
+  ov.className='mover';
+  const title=S.lang==='ar'?'📸 الإبلاغ عن سعر':'📸 Signaler un prix';
+  const ph=S.lang==='ar'?'مثلاً: ':'Ex: ';
+  const conf=S.lang==='ar'?'✅ تأكيد السعر':'✅ Confirmer le prix';
+  const ann=S.lang==='ar'?'إلغاء':'Annuler';
+  ov.innerHTML=`<div class="msheet"><div class="mhandle"></div>
+    <div style="font-size:18px;font-weight:900;margin-bottom:6px">${title}</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:18px">${s.e} ${s.n} · ${cityName(s.c)}</div>
+    <div style="margin-bottom:12px">
+      <div class="sl" style="margin-bottom:7px">${T(S.fuel.toLowerCase())} (MAD/L)</div>
+      <input class="inp" type="number" step="0.01" id="np-inp" placeholder="${ph}${getP(s).toFixed(2)}" style="font-size:20px;font-weight:900"/>
+    </div>
+    <button onclick="submitP()" class="btn-or" style="margin-bottom:10px">${conf}</button>
+    <button onclick="document.querySelector('.mover').remove()" class="btn-gh">${ann}</button>
+  </div>`;
+  ov.onclick=e=>{if(e.target===ov)ov.remove()};
+  document.getElementById('modal-c').appendChild(ov);
+  setTimeout(()=>document.getElementById('np-inp')?.focus(),300);
+}
+
+function submitP(){
+  const v=document.getElementById('np-inp')?.value;
+  if(!v||isNaN(v)){toast('⚠️',S.lang==='ar'?'أدخل سعراً صحيحاً':'Prix invalide','er');return}
+  document.querySelector('.mover')?.remove();
+  toast('✅',T('t_signale')+` — ${S.sel?.n} ${parseFloat(v).toFixed(2)} MAD`);
+}
+
+function shareStation(){
+  const s=S.sel;if(!s)return;
+  const txt=`⛽ ${s.n} ${cityName(s.c)}: ${getP(s).toFixed(2)} MAD/L (${T(S.fuel.toLowerCase())}) — Fuel Maroc 🇲🇦`;
+  if(navigator.share)navigator.share({title:'Fuel Maroc',text:txt,url:location.href});
+  else{if(navigator.clipboard)navigator.clipboard.writeText(txt);toast('📋',T('t_copied'))}
+}
+
+function shareApp(){
+  const txt=S.lang==='ar'?'⛽ Fuel Maroc — قارن أسعار الوقود في المغرب! 🇲🇦':'⛽ Fuel Maroc — Comparez les prix d\'essence ! 🇲🇦';
+  if(navigator.share)navigator.share({title:'Fuel Maroc',text:txt,url:location.href});
+  else toast('📢',S.lang==='ar'?'تمت المشاركة!':'Partagé!');
+}
+
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
+renderHome();
+renderMap();
+updDist();
+
+// Auto notification after 3s
+setTimeout(()=>{
+  const b=getCityS('Casablanca','Gasoil')[0];
+  if(b){
+    const msg=S.lang==='ar'?
+      `${b.n} · غازوال ${b.G.toFixed(2)} درهم/ل — وفّر الآن 💰`:
+      `${b.n} · Gasoil ${b.G.toFixed(2)} MAD/L — Économisez maintenant 💰`;
+    toast(S.lang==='ar'?`⛽ محطة أرخص على بُعد ${b.d}كم!`:`⛽ Station moins chère à ${b.d}km !`,msg);
+  }
+},3000);
+</script>
+</body>
+</html>
